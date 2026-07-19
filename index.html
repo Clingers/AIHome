@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIHome - 导航</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        header {
+            text-align: center;
+            padding: 60px 0 40px;
+        }
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        header p {
+            color: #888;
+            margin-top: 10px;
+            font-size: 1.05rem;
+        }
+        .search-bar {
+            display: flex;
+            max-width: 560px;
+            margin: 30px auto 0;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 4px 4px 4px 16px;
+            transition: border-color 0.2s;
+        }
+        .search-bar:focus-within { border-color: #60a5fa; }
+        .search-bar input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: #eee;
+            font-size: 1rem;
+            padding: 10px 0;
+        }
+        .search-bar input::placeholder { color: #555; }
+        .search-bar button {
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 10px 22px;
+            transition: opacity 0.2s;
+        }
+        .search-bar button:hover { opacity: 0.85; }
+        .categories { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 40px; }
+        .category {
+            background: #16162a;
+            border: 1px solid #252545;
+            border-radius: 16px;
+            padding: 24px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .category:hover { border-color: #3a3a6a; transform: translateY(-2px); }
+        .category h2 {
+            font-size: 1.1rem;
+            color: #a78bfa;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #252545;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .category h2 .icon { font-size: 1.3rem; }
+        .links { display: flex; flex-direction: column; gap: 8px; }
+        .links a {
+            color: #b0b0d0;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .links a:hover {
+            background: #1e1e3a;
+            color: #fff;
+        }
+        .links a .tag {
+            font-size: 0.72rem;
+            background: #2a2a4a;
+            padding: 2px 8px;
+            border-radius: 6px;
+            color: #888;
+            margin-left: auto;
+        }
+        footer {
+            text-align: center;
+            color: #555;
+            padding: 40px 0;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 640px) {
+            header h1 { font-size: 2rem; }
+            .categories { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✦ AIHome</h1>
+            <p>你的 AI 导航首页</p>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="搜索链接..." />
+                <button onclick="searchLinks()">搜索</button>
+            </div>
+        </header>
+
+        <div class="categories" id="categoryContainer">
+            <!-- 分类由 JS 动态渲染 -->
+        </div>
+        <footer>AIHome · 自定义导航</footer>
+    </div>
+
+    <script>
+        const data = [
+            {
+                name: "🤖 AI 对话",
+                links: [
+                    { name: "ChatGPT", url: "https://chatgpt.com", tag: "OpenAI" },
+                    { name: "Claude", url: "https://claude.ai", tag: "Anthropic" },
+                    { name: "Gemini", url: "https://gemini.google.com", tag: "Google" },
+                    { name: "DeepSeek", url: "https://chat.deepseek.com", tag: "深度求索" },
+                    { name: "Kimi", url: "https://kimi.moonshot.cn", tag: "月之暗面" },
+                    { name: "豆包", url: "https://www.doubao.com", tag: "字节跳动" },
+                    { name: "通义千问", url: "https://tongyi.aliyun.com", tag: "阿里" },
+                    { name: "文心一言", url: "https://yiyan.baidu.com", tag: "百度" },
+                ]
+            },
+            {
+                name: "🎨 AI 创作",
+                links: [
+                    { name: "Midjourney", url: "https://www.midjourney.com", tag: "文生图" },
+                    { name: "DALL·E", url: "https://labs.openai.com", tag: "OpenAI" },
+                    { name: "Stable Diffusion", url: "https://stability.ai", tag: "开源" },
+                    { name: "Suno", url: "https://suno.com", tag: "音乐" },
+                    { name: "Runway", url: "https://runwayml.com", tag: "视频" },
+                    { name: "Pika", url: "https://pika.art", tag: "视频" },
+                ]
+            },
+            {
+                name: "💻 开发工具",
+                links: [
+                    { name: "GitHub", url: "https://github.com", tag: "代码托管" },
+                    { name: "Hugging Face", url: "https://huggingface.co", tag: "模型" },
+                    { name: "Vercel", url: "https://vercel.com", tag: "部署" },
+                    { name: "Netlify", url: "https://netlify.com", tag: "部署" },
+                    { name: "Replit", url: "https://replit.com", tag: "在线 IDE" },
+                    { name: "CodeSandbox", url: "https://codesandbox.io", tag: "沙盒" },
+                ]
+            },
+            {
+                name: "📚 学习资源",
+                links: [
+                    { name: "arXiv", url: "https://arxiv.org", tag: "论文" },
+                    { name: "Papers with Code", url: "https://paperswithcode.com", tag: "论文+代码" },
+                    { name: "Google Scholar", url: "https://scholar.google.com", tag: "学术" },
+                    { name: "Coursera", url: "https://www.coursera.org", tag: "课程" },
+                    { name: "MIT OpenCourseWare", url: "https://ocw.mit.edu", tag: "公开课" },
+                    { name: "Kaggle", url: "https://www.kaggle.com", tag: "竞赛" },
+                ]
+            },
+            {
+                name: "🔧 效率工具",
+                links: [
+                    { name: "Notion", url: "https://www.notion.so", tag: "笔记" },
+                    { name: "Obsidian", url: "https://obsidian.md", tag: "知识库" },
+                    { name: "Perplexity", url: "https://www.perplexity.ai", tag: "AI 搜索" },
+                    { name: "Grammarly", url: "https://app.grammarly.com", tag: "写作" },
+                    { name: "Excalidraw", url: "https://excalidraw.com", tag: "白板" },
+                    { name: "Figma", url: "https://www.figma.com", tag: "设计" },
+                ]
+            },
+            {
+                name: "🌐 社区 & 资讯",
+                links: [
+                    { name: "Hacker News", url: "https://news.ycombinator.com", tag: "资讯" },
+                    { name: "Reddit ML", url: "https://www.reddit.com/r/MachineLearning/", tag: "社区" },
+                    { name: "知乎", url: "https://www.zhihu.com", tag: "社区" },
+                    { name: "Twitter/X", url: "https://x.com", tag: "资讯" },
+                    { name: "Product Hunt", url: "https://www.producthunt.com", tag: "产品" },
+                    { name: "Dev.to", url: "https://dev.to", tag: "开发者" },
+                ]
+            }
+        ];
+
+        function render(categories) {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = categories.map(cat => `
+                <div class="category">
+                    <h2><span class="icon">${cat.name.split(' ')[0]}</span> ${cat.name.split(' ').slice(1).join(' ')}</h2>
+                    <div class="links">
+                        ${cat.links.map(link => `
+                            <a href="${link.url}" target="_blank" rel="noopener">
+                                ${link.name}
+                                <span class="tag">${link.tag}</span>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function searchLinks() {
+            const q = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!q) { render(data); return; }
+            const filtered = data.map(cat => ({
+                ...cat,
+                links: cat.links.filter(l => l.name.toLowerCase().includes(q) || l.tag.toLowerCase().includes(q))
+            })).filter(cat => cat.links.length > 0);
+            render(filtered);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', searchLinks);
+        render(data);
+    </script>
+</body>
+</html>
